@@ -1,9 +1,13 @@
 //Sound
 import processing.sound.*;
 Sound s;
-SinOsc sin;
-float speed;
-boolean randomSetup, randomAudioFlag = false;
+SinOsc sin1, sin2;
+SoundFile audio;
+float speed, volume;
+boolean randomAudioFlag = false, randomAudioStop = false, 
+        mooseSoundFlag = false, mooseSoundStop = false, 
+        memSoundFlag = false, memSoundStop = false, 
+        ukeSoundFlag = false, ukeSoundStop = false;
 
 //Buttons
 boolean startBtnPressed, a1BtnPressed, a2BtnPressed, a3BtnPressed, a4BtnPressed, menuBackBtnPressed, gameBackBtnPressed; //Used to track every menu btn
@@ -27,7 +31,6 @@ void setup() {
   a4BtnPressed = false;
   menuBackBtnPressed = false;
   gameBackBtnPressed = false;
-  randomSetup = false;
 
   //Setup screen widths and heights
   w1 = width/4;
@@ -86,7 +89,6 @@ void soundMenu() {
     soundApp("Audio 3");
   } else if (a4BtnPressed) {
     soundApp("Random Audio");
-    randomAudioLoop();
   } else if (menuBackBtnPressed) {
     startBtnPressed = false;
     menuBackBtnPressed = false;
@@ -117,23 +119,28 @@ void soundMenu() {
 void checkMenuBtnPress() {
   if (mousePressed && mouseX > w1-10 && mouseX < w2-10 && mouseY >h1-10 && mouseY < h2-10) {
     a1BtnPressed = true;
+    mooseSoundFlag = true;
   }
 
   if (mousePressed && mouseX > w2+10 && mouseX < w3+10 && mouseY >h1-10 && mouseY < h2-10) {
     a2BtnPressed = true;
+    memSoundFlag = true;
   }
 
   if (mousePressed && mouseX > w1-10 && mouseX < w2-10 && mouseY >h2+10 && mouseY < h3+10) {
     a3BtnPressed = true;
+    ukeSoundFlag = true;
   }
 
   if (mousePressed && mouseX > w2+10 && mouseX < w3+10 && mouseY >h2+10 && mouseY < h3+10) {
     a4BtnPressed = true;
     randomAudioFlag = true;
+    System.out.println("Pressed random button: " + String.valueOf(randomAudioFlag));
   }
 
   if (mousePressed && mouseX > 0 && mouseX < w1/4 && mouseY > 0 && mouseY < h1/4) {
     menuBackBtnPressed = true;
+    System.out.println("Menu back button pressed: " + String.valueOf(menuBackBtnPressed));
   }
 }
 
@@ -147,6 +154,24 @@ void soundApp(String s) {
   textSize(h1/8);
   text("Back", 0, 0, w1/4, h1/4);
   text("Playing " + s, w2, h2);
+  //when any game button is triggered it will go to sound app. To play the specific audio chosen, the if statement will take the text of that audio and play the loop assigned to that button.
+  //Setting mooseSoundStop to true in this if statement, means that when the user presses the back button, it will stop the moose audio without needing to store what s was before the back button was pressed.
+  if (s == "Audio 1") {
+    mooseSoundLoop();
+    mooseSoundStop = true;
+  }
+  if (s == "Audio 2") {
+    memSoundLoop();
+    memSoundStop = true;
+  }
+  if (s == "Audio 3") {
+    ukeSoundLoop();
+    ukeSoundStop = true;
+  }
+  if (s == "Random Audio") {
+    randomAudioLoop();
+    randomAudioStop = true;
+  }
   checkGameBtnPress();
 }
 
@@ -165,34 +190,110 @@ void gameBtnPressed() {
     a3BtnPressed = false;
     a4BtnPressed = false;
     gameBackBtnPressed = false;
+    mooseSoundStop();
+    memSoundStop();
+    ukeSoundStop();
+    randomAudioStop();
   }
  
 }
 
 void randomAudioLoop() {
   if (randomAudioFlag) {
+    System.out.println("Starting to play audio");
+    System.out.println(String.valueOf(randomAudioFlag));
     speed = 300;
     // Play two sine oscillators with slightly different frequencies for a nice "beat".
-    sin = new SinOsc(this);
-    sin.play(300, 0.3);
-    sin = new SinOsc(this);
-    sin.play(305, 0.3);
-    //sin.freq(200);
+    sin1 = new SinOsc(this);
+    sin1.play(300, 0.3);
+    sin2 = new SinOsc(this);
+    sin2.play(305, 0.3);
     
     // Create a Sound object for globally controlling the output volume.
     s = new Sound(this);
-    randomSetup = true;
     
     randomAudioFlag = false;
+    System.out.println("Started sound and now I'm ending the if statement");
+        System.out.println(String.valueOf(randomAudioFlag));
   }
   
   // Map vertical mouse position to volume.
   float amplitude = map(mouseY, 0, height, 1, 0.0);
   int val = int(map(mouseX, 0, width, 0, 800));
-  // Instead of setting the volume for every oscillator individually, we can just
-  // control the overall output volume of the whole Sound library.
+  // Instead of setting the volume for every oscillator individually, we can just control the overall output volume of the whole Sound library.
   s.volume(amplitude);
-  sin.freq(val);
-  System.out.println(val);
+  //sin1.freq(val);
+  sin2.freq(val);
+  //System.out.println(val);
   // sin.play(speed, 0.3);
+}
+
+void randomAudioStop() {
+   if (randomAudioStop) {
+    sin1.stop();
+    sin2.stop();
+  }
+}
+
+//Audio 1 sound loop - it plays the audio moose.mp3
+void mooseSoundLoop() {
+  if (mooseSoundFlag) {
+    audio = new SoundFile(this, "moose.mp3");
+    audio.play();
+    mooseSoundFlag = false;
+  }
+  volume = map(mouseY, height, 0, 0, 1.0);
+  speed = map(mouseX, 0, width, 1, 2);
+  audio.amp(volume);
+  audio.rate(speed);
+}
+
+//Audio 1 sound stop - function to stop the audio moose.mp3
+void mooseSoundStop() {
+  //when mooseSoundStop = true then the audio will stop, if not mooseSoundStop will run until it is true.
+  if (mooseSoundStop) {
+    audio.stop();
+  }
+}
+
+//Audio 2 sound loop - it plays the audio memories.mp3
+void memSoundLoop() {
+  if (memSoundFlag) {
+    audio = new SoundFile(this, "memories.mp3");
+    audio.play();
+    memSoundFlag = false;
+  }
+  volume = map(mouseY, height, 0, 0, 1.0);
+  speed = map(mouseX, 0, width, 1, 2);
+  audio.amp(volume);
+  audio.rate(speed);
+}
+
+//Audio 2 sound stop - function to stop the audio memories.mp3
+void memSoundStop() {
+  //when mooseSoundStop = true then the audio will stop, if not mooseSoundStop will run until it is true.
+  if (memSoundStop) {
+    audio.stop();
+  }
+}
+
+//Audio 3 sound loop - function to play the audio ukulele.mp3
+void ukeSoundLoop() {
+  if (ukeSoundFlag) {
+    audio = new SoundFile(this, "ukulele.mp3");
+    audio.play();
+    ukeSoundFlag = false;
+  }
+  volume = map(mouseY, height, 0, 0, 1.0);
+  speed = map(mouseX, 0, width, 1, 2);
+  audio.amp(volume);
+  audio.rate(speed);
+}
+
+//Audio 3 sound stop - function to stop the audio ukulele.mp3
+void ukeSoundStop() {
+  //when mooseSoundStop = true then the audio will stop, if not mooseSoundStop will run until it is true.
+  if (ukeSoundStop) {
+    audio.stop();
+  }
 }
