@@ -135,12 +135,10 @@ void checkMenuBtnPress() {
   if (mousePressed && mouseX > w2+10 && mouseX < w3+10 && mouseY >h2+10 && mouseY < h3+10) {
     a4BtnPressed = true;
     randomAudioFlag = true;
-    System.out.println("Pressed random button: " + String.valueOf(randomAudioFlag));
   }
 
   if (mousePressed && mouseX > 0 && mouseX < w1/4 && mouseY > 0 && mouseY < h1/4) {
     menuBackBtnPressed = true;
-    System.out.println("Menu back button pressed: " + String.valueOf(menuBackBtnPressed));
   }
 }
 
@@ -196,43 +194,6 @@ void gameBtnPressed() {
     randomAudioStop();
   }
  
-}
-
-void randomAudioLoop() {
-  if (randomAudioFlag) {
-    System.out.println("Starting to play audio");
-    System.out.println(String.valueOf(randomAudioFlag));
-    speed = 300;
-    // Play two sine oscillators with slightly different frequencies for a nice "beat".
-    sin1 = new SinOsc(this);
-    sin1.play(300, 0.3);
-    sin2 = new SinOsc(this);
-    sin2.play(305, 0.3);
-    
-    // Create a Sound object for globally controlling the output volume.
-    s = new Sound(this);
-    
-    randomAudioFlag = false;
-    System.out.println("Started sound and now I'm ending the if statement");
-        System.out.println(String.valueOf(randomAudioFlag));
-  }
-  
-  // Map vertical mouse position to volume.
-  float amplitude = map(mouseY, 0, height, 1, 0.0);
-  int val = int(map(mouseX, 0, width, 0, 800));
-  // Instead of setting the volume for every oscillator individually, we can just control the overall output volume of the whole Sound library.
-  s.volume(amplitude);
-  //sin1.freq(val);
-  sin2.freq(val);
-  //System.out.println(val);
-  // sin.play(speed, 0.3);
-}
-
-void randomAudioStop() {
-   if (randomAudioStop) {
-    sin1.stop();
-    sin2.stop();
-  }
 }
 
 //Audio 1 sound loop - it plays the audio moose.mp3
@@ -295,5 +256,37 @@ void ukeSoundStop() {
   //when mooseSoundStop = true then the audio will stop, if not mooseSoundStop will run until it is true.
   if (ukeSoundStop) {
     audio.stop();
+  }
+}
+
+//Random Audio - function to play the audio generated from sin oscilators
+void randomAudioLoop() {
+  if (randomAudioFlag) {
+    speed = 300;
+    // Play two sine oscillators with slightly different frequencies for a nice "beat".
+    sin1 = new SinOsc(this);
+    sin1.play(300, 0.3);
+    sin2 = new SinOsc(this);
+    sin2.play(305, 0.3);
+    
+    // Create a Sound object for globally controlling the output volume.
+    s = new Sound(this);
+    
+    randomAudioFlag = false;
+  }
+  
+  // Map vertical mouse position to volume.
+  float amplitude = map(mouseY, 0, height, 1, 0.0);
+  int val = int(map(mouseX, 0, width, 0, 800));
+  // Instead of setting the volume for every oscillator individually, we can just control the overall output volume of the whole Sound library.
+  s.volume(amplitude);
+  sin2.freq(val);
+}
+
+//Random Audio - function to stop the audio generated from sin oscilators
+void randomAudioStop() {
+   if (randomAudioStop) {
+    sin1.stop();
+    sin2.stop();
   }
 }
