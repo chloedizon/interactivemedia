@@ -7,7 +7,8 @@ float speed, volume; //used to adjust the rate and volume of the music in the so
 boolean randomAudioFlag = false, randomAudioStop = false, 
         mooseSoundFlag = false, mooseSoundStop = false, 
         memSoundFlag = false, memSoundStop = false, 
-        ukeSoundFlag = false, ukeSoundStop = false; //boolean flags and stops to play and stop all audio
+        uPickSoundFlag = false, uPickSoundStop = false,
+        uPickLoopFlag = false, fileSelectFlag = false; //boolean flags and stops to play and stop all audio
 
 //Buttons
 boolean startBtnPressed, a1BtnPressed, a2BtnPressed, a3BtnPressed, a4BtnPressed, menuBackBtnPressed, gameBackBtnPressed; //Used to track every menu btn
@@ -129,7 +130,7 @@ void checkMenuBtnPress() {
 
   if (mousePressed && mouseX > w1-10 && mouseX < w2-10 && mouseY >h2+10 && mouseY < h3+10) {
     a3BtnPressed = true;
-    ukeSoundFlag = true; //sets the audio 3 flag to true to trigger the setup of audio 3
+    uPickSoundFlag = true; //sets the audio 3 flag to true to trigger the setup of audio 3
   }
 
   if (mousePressed && mouseX > w2+10 && mouseX < w3+10 && mouseY >h2+10 && mouseY < h3+10) {
@@ -163,8 +164,8 @@ void soundApp(String s) {
     memSoundStop = true;
   }
   if (s == "Audio 3") {
-    ukeSoundLoop();
-    ukeSoundStop = true;
+    uPickSoundLoop();
+    uPickSoundStop = true;
   }
   if (s == "Random Audio") {
     randomAudioLoop();
@@ -191,7 +192,7 @@ void gameBtnPressed() {
     //audio functions - waits until the sound/audio stop flag is triggered by the back button
     mooseSoundStop(); 
     memSoundStop();
-    ukeSoundStop();
+    uPickSoundStop();
     randomAudioStop();
   }
  
@@ -243,26 +244,36 @@ void memSoundStop() {
   }
 }
 
-//Audio 3 sound loop - function to play the audio ukulele.mp3
-void ukeSoundLoop() {
-  //setup loop
-  if (ukeSoundFlag) {
-    audio = new SoundFile(this, "ukulele.mp3");
-    audio.play(); //starts the playback of the audio soundfile
-    ukeSoundFlag = false; //stops the looping of the setup
+//Audio 3 sound loop - allows user to pick any audio file
+void uPickSoundLoop() {
+  if(uPickSoundFlag) {
+    selectInput("Select an audio sample", "fileSelected"); //allows user to select an audio sample
+    uPickSoundFlag = false;
+    fileSelectFlag = true;
   }
-  //loop
   volume = map(mouseY, height, 0, 0, 1.0); //map remaps a number from one range to another i.e. for volume, the range is between 0 and 1. It will take the Y value of the mouse and adjust it to fit the volume. It's height to 0 because of the way processing maps the values i.e. height is the bottom and 0 is the top.
   speed = map(mouseX, 0, width, 1, 2); //remaps the value of the mouseX location to play the audio faster from it's normal speed to 2x its speed
-  audio.amp(volume); //changes the amplitude/volume of the player by taking the mapped value from variable volume so the volume will get louder as the mouse moves up the screen
-  audio.rate(speed); //sets the playback of the sound file to be faster as the mouse moves to the right. as a result the pitch of the music will also get higher.
+  //wait until the audio is chosen then adjust the volume and speed
+  if (uPickLoopFlag) {
+    audio.amp(volume); //changes the amplitude/volume of the player by taking the mapped value from variable volume so the volume will get louder as the mouse moves up the screen
+    audio.rate(speed); //sets the playback of the sound file to be faster as the mouse moves to the right. as a result the pitch of the music will also get higher.
+  }
 }
-
-//Audio 3 sound stop - function to stop the audio ukulele.mp3
-void ukeSoundStop() {
-  //when mooseSoundStop = true then the audio will stop, if not ukeSoundStop will run until it is true.
-  if (ukeSoundStop) {
-    audio.stop(); //stops the playback
+//Audio 3 - fileSelected - takes the user file pick and plays it
+void fileSelected(File sample) {
+  if (fileSelectFlag) {
+    String fileName = sample.getAbsolutePath(); //gets the file path of the file i.e. directory and file name
+    
+    audio = new SoundFile(this, fileName); //creates a new class for the sound file
+    audio.play(); //plays the selected file
+    uPickLoopFlag = true; //sets the flag to true because audio has been selected and ready to play
+    fileSelectFlag = false; //turned to flase because the userhas already picked the audio, they don't need to pick it again
+  }
+}
+//Audio 3 sound stop - function to stop the audio picked by the user
+void uPickSoundStop() {
+  if(uPickSoundStop) {
+    audio.stop(); //stops the audio when back button is pressed
   }
 }
 
