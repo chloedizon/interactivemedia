@@ -17,7 +17,7 @@ int  h1, h2, h3, h4; //Screen height divded into 4 segments
 int ranRGBval = 255;  
 PFont bannerFont;
 PFont descriptionFont;
-int x = 100;
+float randX = random(height);
 
 void settings() {
   size(displayWidth*3>>2, displayHeight*3>>2);
@@ -47,6 +47,10 @@ void setup() {
   descriptionFont = createFont("VCR_OSD_MONO_1.001.ttf", h1/8);
 }
 
+/* 
+   -------CONTROLS THE HOME/START PAGE (1ST)-------
+*/
+
 void draw() {
   background(0);
   colorMode(HSB,360, 100, 100);
@@ -55,11 +59,9 @@ void draw() {
     ranRGBval = 360;
   }
 
-
   if (startBtnPressed) {
     soundMenu();
   } else {
-    // Show the start button and page
     fill(ranRGBval,360,260);
     rect(w1, h2, w2, h1);
     fill(0,0,360);
@@ -71,25 +73,27 @@ void draw() {
     textSize(h1/2);
     textAlign(CENTER, CENTER);
     text("START", w2, (h2 + h3)/2);
-
     if (mousePressed && mouseX > w1 && mouseX < w3 && mouseY >h2 && mouseY < h3) {
       startBtnPressed = true;
       delay(300); //Delayed, or else the mouse press will be too quick and will pick the audio level
     }
-
   }
 }
+
+/* 
+  -------CONTROLS THE MENU PAGE (2ND)-------
+*/
 
 void soundMenu() {
 
   if (a1BtnPressed) {
-    soundApp("Audio 1"); //plays Audio 1
+    soundGame("Audio 1"); //plays Audio 1
   } else if (a2BtnPressed) {
-    soundApp("Audio 2"); //plays Audio 2
+    soundGame("Audio 2"); //plays Audio 2
   } else if (a3BtnPressed) {
-    soundApp("Audio 3"); //plays Audio 3
+    soundGame("Audio 3"); //plays Audio 3
   } else if (a4BtnPressed) {
-    soundApp("Random Audio"); // plays random audio
+    soundGame("Random Audio"); // plays random audio
   } else if (menuBackBtnPressed) {
     startBtnPressed = false;
     menuBackBtnPressed = false;
@@ -117,6 +121,43 @@ void soundMenu() {
   }
 }
 
+/* 
+   -------CONTROLS THE GAME PAGE (3RD)-------
+*/
+
+void soundGame(String s) {
+  //Here will be the actual code for the game
+  fill(ranRGBval,360,260);
+  rect(0, 0, w1/4, h1/4);
+  fill(0,0,360);
+  textSize(h1/8);
+  text("Back", 0, 0, w1/4, h1/4);
+  text("Playing " + s, w2, h2);
+  //when any game button is triggered it will go to sound app. To play the specific audio chosen, the if statement will take the text of that audio and play the loop assigned to that button.
+  //Setting mooseSoundStop to true in this if statement, means that when the user presses the back button, it will stop the moose audio without needing to store what s was before the back button was pressed.
+  if (s == "Audio 1") {
+    mooseSoundLoop();
+    mooseSoundStop = true;
+  }
+  if (s == "Audio 2") {
+    memSoundLoop();
+    memSoundStop = true;
+  }
+  if (s == "Audio 3") {
+    uPickSoundLoop();
+    uPickSoundStop = true;
+  }
+  if (s == "Random Audio") {
+    randomAudioLoop();
+    randomAudioStop = true;
+  }
+  checkGameBackBtnPress(); //waits until back button is pressed
+}
+
+/* 
+   -------CHECKS WHICH BUTTON HAS BEEN PRESSED ON THE MENU PAGE (2ND)-------
+*/
+
 void checkMenuBtnPress() {
   if (mousePressed && mouseX > w1-10 && mouseX < w2-10 && mouseY >h1-10 && mouseY < h2-10) {
     a1BtnPressed = true;
@@ -143,45 +184,21 @@ void checkMenuBtnPress() {
   }
 }
 
-
-
-void soundApp(String s) {
-  //Here will be the actual code for the game
-  fill(0);
-  rect(0, 0, w1/4, h1/4);
-  fill(0,0,360);
-  textSize(h1/8);
-  text("Back", 0, 0, w1/4, h1/4);
-  text("Playing " + s, w2, h2);
-  //when any game button is triggered it will go to sound app. To play the specific audio chosen, the if statement will take the text of that audio and play the loop assigned to that button.
-  //Setting mooseSoundStop to true in this if statement, means that when the user presses the back button, it will stop the moose audio without needing to store what s was before the back button was pressed.
-  if (s == "Audio 1") {
-    mooseSoundLoop();
-    mooseSoundStop = true;
-  }
-  if (s == "Audio 2") {
-    memSoundLoop();
-    memSoundStop = true;
-  }
-  if (s == "Audio 3") {
-    uPickSoundLoop();
-    uPickSoundStop = true;
-  }
-  if (s == "Random Audio") {
-    randomAudioLoop();
-    randomAudioStop = true;
-  }
-  checkGameBtnPress(); //waits until back button is pressed
-}
-
-void checkGameBtnPress() {
+/* 
+   -------CHECKS WHICH BUTTON HAS BEEN PRESSED ON THE GAME PAGE (3ND)-------
+*/
+void checkGameBackBtnPress() {
   if (mousePressed && mouseX > 0 && mouseX < w1/4 && mouseY > 0 && mouseY < h1/4) {
     gameBackBtnPressed = true;
   }
-  gameBtnPressed();
+  gameBackBtnPressed();
 }
 
-void gameBtnPressed() {
+/* 
+   -------CONTROLS BACK BUTTON ON GAME PAGE(3ND)-------
+*/
+
+void gameBackBtnPressed() {
   if (gameBackBtnPressed) {
     delay(300);
     a1BtnPressed = false;
