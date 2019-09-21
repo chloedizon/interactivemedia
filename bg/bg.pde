@@ -1,11 +1,8 @@
-
-int num = 1; //How manx in one frame
-int x = 100;
 int ranRGBval = 360;
+float randX = random(height);
 
 void setup() {
   size(1920, 1080);
-  //frameRate(10);
     background(0);
 }
 
@@ -15,28 +12,26 @@ void draw() {
    if (ranRGBval == 0) {
     ranRGBval = 360;
   }
-  //fill(200, 50, 100, alpha);
-    //pushMatrix();
-    //rotate(random(TWO_PI));
-    //translate(random(width), random(height));
+  
     drawBackground();
-    //twinkle();
-    //popMatrix();
+
   }
 
 
 void drawBackground() {
+  fill(0);
+  fill(0, 10);
+  noStroke();
+  rect(0, 0, width, height);
   rotate(random(TWO_PI));
   translate(random(width), random(height));
-  delay(100);
   beginShape();
-   fill(ranRGBval,100, 100);
-    stroke(ranRGBval, 100, 100);
-    ellipse(x, x, 20, 15);
-    line(x+10, x-40, x+10, x);
-    triangle(x+10, x-40, x+20, x-20, x+10, x-30);
-    triangle(x+15, x-20, x+20, x-20, x+10, x-30);
-    triangle(x+15, x-20, x+20, x-20, x+15, x-10);
-   delay(100);
+  fill(ranRGBval,100, 100);
+  stroke(ranRGBval, 100, 100);
+  ellipse(randX, randX, 40, 30);
+  line(randX+20, randX-80, randX+20, randX);
+  triangle(randX+20, randX-80, randX+40, randX-40, randX+20, randX-60);
+  triangle(randX+30, randX-40, randX+40, randX-40, randX+20, randX-60);
+   triangle(randX+30, randX-40, randX+40, randX-40, randX+30, randX-20);
   endShape(CLOSE);
 }
