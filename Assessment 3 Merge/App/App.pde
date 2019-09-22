@@ -18,6 +18,9 @@ Label homeHeading, homeDescription;
 
 boolean audioSetupFlag;
 
+MusicNote[] notes = new MusicNote[60];
+int noteCounter = 0;
+
 void settings() {
   size(displayWidth*3>>2, displayHeight*3>>2);
 }
@@ -68,9 +71,11 @@ void draw() {
 
   switch(page) {
     case "Home":
+      handleNotes();
       homeScreen();
       break;
     case "Menu":
+      handleNotes();
       menuScreen();
       break;
     case "Track 1":
@@ -87,6 +92,28 @@ void draw() {
       break;
     default:
       break;
+  }
+}
+
+void handleNotes() {
+  if (noteCounter != 4) {
+    noteCounter++;
+  } else {
+    noteCounter = 0;
+  }
+  
+  if (noteCounter == 4) {
+    for (int i = 0; i < notes.length - 1; i++) {
+      notes[i] = notes[i + 1];
+    }
+    
+    notes[notes.length - 1] = new MusicNote(color(random(360), 100, 100));
+  }
+  
+  for (int i = 0; i < notes.length; i++) {
+    if (notes[i] instanceof MusicNote) {
+      notes[i].display();
+    }
   }
 }
 

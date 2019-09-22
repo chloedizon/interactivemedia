@@ -20,6 +20,7 @@ class Button {
   }
   
   void display(int hue) {
+    noStroke();
     bColour = color(hue, saturation(bColour), brightness(bColour));
     fill(bColour);
     rect(xPos, yPos, bWidth, bHeight);
