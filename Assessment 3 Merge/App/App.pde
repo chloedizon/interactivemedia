@@ -1,11 +1,14 @@
-//Sound
+import com.leapmotion.leap.*;
 import processing.sound.*; //imports processing sound module
+
+// Sound
 Sound s; //initialiser for the sound in random audio - allows for adjustment of volume
 SinOsc sin1, sin2; //sin oscilators that create the sound for random audio
 SoundFile audio; //plays the mp3 file loaded in audio 1, 2 and 3
 float speed, volume; //used to adjust the rate and volume of the music in the sound file
+boolean audioSetupFlag;
 
-//Buttons
+// Buttons
 int w1, w2, w3, w4; //Screen widths divded into 4 segments
 int  h1, h2, h3, h4; //Screen height divded into 4 segments
 int ranRGBval = 255;  
@@ -14,15 +17,30 @@ PFont descriptionFont;
 
 String page = "Home";
 Button homeStartButton, backButton, menuTrack1Button, menuTrack2Button, menuCustomTrackButton, menuRandomAudioButton;
-Label homeHeading, homeDescription;
+Label homeHeading, homeDescription, menuControllerMsg;
 
-boolean audioSetupFlag;
-
+// Music Note Background
 MusicNote[] notes = new MusicNote[60];
 int noteCounter = 0;
 
+// Music Wave
+Controller controller = new Controller();
+boolean controllerConnected;
+int waveXSpacing, waveWidth;
+float waveTheta, waveAmplitude, wavePeriod, waveDX, rightHandX, rightHandY, leftHandX, leftHandY, rightHandV;
+float[] waveYValues, rightHandVs;
+
 void settings() {
   size(displayWidth*3>>2, displayHeight*3>>2);
+  
+  // Music Wave Setup
+  waveXSpacing = 16;
+  waveWidth = width + waveXSpacing;
+  waveTheta = 0.0;
+  waveAmplitude = height/16;
+  wavePeriod = width*2/3;
+  waveYValues = new float[waveWidth/waveXSpacing];
+  rightHandVs = new float[round(frameRate)];
 }
 
 void setup() {
@@ -61,6 +79,8 @@ void setup() {
   menuTrack2Button = new Button(w2 +10, h1 -10, w1, h1, "Track 2", h1/4, descriptionFont, color(ranRGBval, 360, 260), color(0, 0, 360));
   menuCustomTrackButton = new Button(w1-10, h2 +10, w1, h1, "Upload", h1/4, descriptionFont, color(ranRGBval, 360, 260), color(0, 0, 360));
   menuRandomAudioButton = new Button(w2 +10, h2+10, w1, h1, "Random", h1/4, descriptionFont, color(ranRGBval, 360, 260), color(0, 0, 360));
+  // Labels
+  menuControllerMsg = new Label(w2, h1*0.5, CENTER, BOTTOM, "Leap Motion disconnected. Control Type: Mouse", descriptionFont, color(0, 0, 360));
   
 }
 
@@ -68,6 +88,8 @@ void draw() {
   background(0);
   ranRGBval--;
   ranRGBval = ranRGBval == 0 ? 360 : ranRGBval;
+  
+  controllerConnected = controller.isConnected();
 
   switch(page) {
     case "Home":
@@ -131,6 +153,14 @@ void homeScreen() {
 }
 
 void menuScreen() {
+  if (controllerConnected) {
+    menuControllerMsg = new Label(w2, h1*0.5, CENTER, BOTTOM, "Leap Motion connected. Control Type: Leap Motion", descriptionFont, color(0, 0, 360));
+  } else {
+    menuControllerMsg = new Label(w2, h1*0.5, CENTER, BOTTOM, "Leap Motion disconnected. Control Type: Mouse", descriptionFont, color(0, 0, 360));
+  }
+  
+  menuControllerMsg.display();
+  
   backButton.display(ranRGBval);
   menuTrack1Button.display(ranRGBval);
   menuTrack2Button.display(ranRGBval);
@@ -168,23 +198,89 @@ void menuScreen() {
 }
 
 void gameScreen(String type) {
-   if (type == "Random") {
-     setRandomAudio();
-   } else {
-     setAudioFile(type);
-   }
+  if (controllerConnected) {
+    updateWaveVariables("Controller");
+  } else {
+    updateWaveVariables("Mouse");
+  }
+  
+  if (type == "Random") {
+    setRandomAudio();
+  } else {
+    setAudioFile(type);
+  }
+  
+  renderWave();
    
-   backButton.display(ranRGBval);
+  backButton.display(ranRGBval);
    
-   if (backButton.isPressed()) {
-     page = "Menu";
-     
-     stopAudio(type);
-     
-     backButton.isDisplayed = false;
-     
-     delay(100);
-   }
+  if (backButton.isPressed()) {
+    page = "Menu";
+    
+    stopAudio(type);
+    
+    backButton.isDisplayed = false;
+    
+    delay(100);
+  }
+}
+
+void updateWaveVariables(String controlType) {
+  if (controlType == "Controller") {
+    Frame frame = controller.frame();
+    
+    if(frame.hands().count() == 2) {
+      rightHandX = frame.hands().rightmost().palmPosition().getX();
+      rightHandY = frame.hands().rightmost().palmPosition().getY();
+      
+      leftHandX = frame.hands().leftmost().palmPosition().getX();
+      leftHandY = frame.hands().leftmost().palmPosition().getY();
+      
+      waveAmplitude = (leftHandY - 100) < 0 ? 1 : (leftHandY - 100) > height/2 ? height/2 - 1 : (leftHandY - 100);
+      
+      rightHandV = frame.hands().rightmost().palmVelocity().getX();
+      rightHandV = abs(rightHandV) > 2*width/3 ? 2*width/3 : abs(rightHandV) < width/5 ? width/5 : abs(rightHandV);
+      rightHandV = 2*width/3 - rightHandV;
+      wavePeriod = round((calcAvgVelocity(rightHandV))/10)*10;
+    }
+  } else {
+    waveAmplitude = map(mouseY, height, 0, 1, height/2 - 1);
+    wavePeriod = map(mouseX, 0, width, width*2/3, width/5);
+  }
+  
+  waveDX = (TWO_PI / wavePeriod) * waveXSpacing;
+   
+  waveTheta += 0.02;
+ 
+  float x = waveTheta;
+  for (int i = 0; i < waveYValues.length; i++) {
+    waveYValues[i] = sin(x) * waveAmplitude;
+    x += waveDX;
+  }
+}
+
+float calcAvgVelocity(float v) {
+  float count = 0;
+  
+  for (int i = 0; i < rightHandVs.length - 1; i++) {
+    rightHandVs[i] = rightHandVs[i+1];
+  }
+  
+  rightHandVs[rightHandVs.length-1] = v;
+  
+  for (int i = 0; i < rightHandVs.length; i++) {
+    count += rightHandVs[i];
+  }
+  
+  return count/rightHandVs.length;
+}
+
+void renderWave() {
+  noStroke();
+  fill(255);
+  for (int i = 0; i < waveYValues.length; i++) {
+    ellipse(i * waveXSpacing, height/2 + waveYValues[i], 16, 16);
+  }
 }
 
 void setRandomAudio() {
@@ -199,9 +295,9 @@ void setRandomAudio() {
     audioSetupFlag = true;
   }
   
-  volume = map(mouseY, height, 0, 0, 1);
-  int freq1 = int(map(mouseX, 0, width, 0, 300));
-  int freq2 = int(map(mouseX, 0, width, 0, 900));
+  volume = map(waveAmplitude, 1, height/2 - 1, 0, 1);
+  int freq1 = int(map(wavePeriod, width*2/3, width/5, 0, 300));
+  int freq2 = int(map(wavePeriod, width*2/3, width/5, 0, 900));
   
   sin1.freq(freq1);
   sin2.freq(freq2);
@@ -223,8 +319,8 @@ void setAudioFile(String type) {
     audioSetupFlag = true;
   }
   
-  volume = map(mouseY, height, 0, 0, 1.0); 
-  speed = map(mouseX, 0, width, 1, 2);
+  volume = map(waveAmplitude, 1, height/2 - 1, 0, 1); 
+  speed = map(wavePeriod, width*2/3, width/5, 0.5, 2);
   audio.amp(volume);
   audio.rate(speed);
 }
