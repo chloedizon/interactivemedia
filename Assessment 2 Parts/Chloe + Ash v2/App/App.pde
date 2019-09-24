@@ -8,11 +8,11 @@ float speed, volume; //used to adjust the rate and volume of the music in the so
 //Buttons
 int w1, w2, w3, w4; //Screen widths divded into 4 segments
 int  h1, h2, h3, h4; //Screen height divded into 4 segments
-int ranRGBval = 255;  
-PFont bannerFont;
-PFont descriptionFont;
+int ranRGBval = 255;  //Used to smoothly transition HSB colours
+PFont bannerFont; //Font used for banners/headers
+PFont descriptionFont; //Font used for descriptive text
 
-String page = "Home";
+String page = "Home"; //Used for our Swtich - The original should be home
 Button homeStartButton, backButton, menuTrack1Button, menuTrack2Button, menuCustomTrackButton, menuRandomAudioButton;
 Label homeHeading, homeDescription;
 
@@ -36,8 +36,9 @@ void setup() {
   h3 = 3 * height/4;
   h4 = height;
   
-  colorMode(HSB,360, 100, 100);
+  colorMode(HSB,360, 100, 100); //Setup colour mode to be HSB
   
+  //Setup the fonts and their sizes
   bannerFont = createFont("NEON CLUB MUSIC_medium.otf", h1/2);
   descriptionFont = createFont("VCR_OSD_MONO_1.001.ttf", h1/8);
   
@@ -67,8 +68,10 @@ void setup() {
 void draw() {
   background(0);
   ranRGBval--;
-  ranRGBval = ranRGBval == 0 ? 360 : ranRGBval;
+  ranRGBval = ranRGBval == 0 ? 360 : ranRGBval; //BEN PLZ HELP
 
+//Switch is used to change between 'pages' - works like an 'if else' for multiple cases
+//For different cases, different screens will show.
   switch(page) {
     case "Home":
       handleNotes();
@@ -95,6 +98,7 @@ void draw() {
   }
 }
 
+//BEN PLZ HELP BELOW
 void handleNotes() {
   if (noteCounter != 4) {
     noteCounter++;
@@ -123,20 +127,23 @@ void homeScreen() {
   homeHeading.display();
   homeDescription.display();
 
+  //If start is pressed, go to menu page and stop showing home button
   if (homeStartButton.isPressed()) {
     page = "Menu";
     homeStartButton.isDisplayed = false;
-    delay(100);
+    delay(100); //Mouse click is slower than FPS, needs delay so that 
   }
 }
 
 void menuScreen() {
+  //Always display these buttons on menu page with their random colours
   backButton.display(ranRGBval);
   menuTrack1Button.display(ranRGBval);
   menuTrack2Button.display(ranRGBval);
   menuCustomTrackButton.display(ranRGBval);
   menuRandomAudioButton.display(ranRGBval);
   
+  //If back button pressed, go Home and stop showing menu buttons
   if (backButton.isPressed()) {
     page = "Home";
     
@@ -149,8 +156,9 @@ void menuScreen() {
     delay(100);
   }
   
+  //If menu tracks are pressed, go to their respective page, stop showing menu buttons
   if (menuTrack1Button.isPressed() || menuTrack2Button.isPressed() || menuCustomTrackButton.isPressed() || menuRandomAudioButton.isPressed()) {
-    audioSetupFlag = false;
+    audioSetupFlag = false; //BEN HELP WHAT IS THIS FOR
     
     if (menuTrack1Button.isPressed()) page = "Track 1";
     if (menuTrack2Button.isPressed()) page = "Track 2";
@@ -167,6 +175,7 @@ void menuScreen() {
   }
 }
 
+//Setup for game screen. Go to screen chosen. if back button pressed go back to menu and stop the audio.
 void gameScreen(String type) {
    if (type == "Random") {
      setRandomAudio();

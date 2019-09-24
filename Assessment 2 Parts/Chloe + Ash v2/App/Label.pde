@@ -6,6 +6,7 @@ class Label {
   PFont font;
   color fontColour;
   
+  //BEN WHY IS THERE TWO LABELS
   Label(float x, float y, int a1, int a2, String l, PFont f, color fc) {
     xPos = x;
     yPos = y;

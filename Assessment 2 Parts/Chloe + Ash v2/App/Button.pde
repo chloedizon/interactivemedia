@@ -7,6 +7,7 @@ class Button {
   boolean isDisplayed;
   color bColour, lColour;
   
+  //Creates the button
   Button(float x, float y, float w, float h, String label, int fontSize, PFont font, color button_colour, color label_colour) {
     xPos = x;
     yPos = y;
@@ -19,6 +20,7 @@ class Button {
     lColour = label_colour;    
   }
   
+  //Displays the button
   void display(int hue) {
     noStroke();
     bColour = color(hue, saturation(bColour), brightness(bColour));
@@ -32,6 +34,7 @@ class Button {
     isDisplayed = true;
   }
   
+  //Check if button is pressed
   boolean isPressed() {
     if(mousePressed && isDisplayed && mouseX >= xPos && mouseX <= xPos + bWidth && mouseY >= yPos && mouseY <= yPos + bHeight) {
       return true;
@@ -39,7 +42,7 @@ class Button {
     return false;
   }
   
-  void setDisplayed(boolean flag) {
+  void setDisplayed(boolean flag) { //BEN WHEN IS THIS USED
     isDisplayed = flag;
   }
 }

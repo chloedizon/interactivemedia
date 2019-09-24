@@ -4,7 +4,7 @@ class MusicNote {
   color noteColour;
   int alpha = 255;
   
-  
+  //BEN PLZ EXPLAIN
   MusicNote(color colour) {
     noteColour = colour;
     rotationAngle = random(TWO_PI);
