@@ -1,5 +1,7 @@
 
+// Class to generate and display all buttons in the app.
 class Button {
+  // Variable declarations.
   float xPos, yPos, bWidth, bHeight;
   PFont bFont;
   String bLabel;
@@ -7,8 +9,9 @@ class Button {
   boolean isDisplayed;
   color bColour, lColour;
   
-  //Creates the button
+  // Button constructor function.
   Button(float x, float y, float w, float h, String label, int fontSize, PFont font, color button_colour, color label_colour) {
+    // Sets all button variables to those passed into the constructor.
     xPos = x;
     yPos = y;
     bWidth = w;
@@ -20,7 +23,7 @@ class Button {
     lColour = label_colour;    
   }
   
-  //Displays the button
+  // Displays the button.
   void display(int hue) {
     noStroke();
     bColour = color(hue, saturation(bColour), brightness(bColour));
@@ -34,15 +37,11 @@ class Button {
     isDisplayed = true;
   }
   
-  //Check if button is pressed
+  // Check if button is pressed.
   boolean isPressed() {
     if(mousePressed && isDisplayed && mouseX >= xPos && mouseX <= xPos + bWidth && mouseY >= yPos && mouseY <= yPos + bHeight) {
       return true;
     }
     return false;
-  }
-  
-  void setDisplayed(boolean flag) { //BEN WHEN IS THIS USED
-    isDisplayed = flag;
   }
 }
