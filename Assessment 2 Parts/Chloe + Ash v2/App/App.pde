@@ -2,8 +2,9 @@
 import processing.sound.*; // imports processing sound module
 Sound s; // initialiser for the sound in random audio - allows for adjustment of volume
 SinOsc sin1, sin2; // sin oscilators that create the sound for random audio
-SoundFile audio; // plays the mp3 file loaded in audio 1, 2 and 3
+SoundFile audio; // plays the mp3 file loaded in audio 1, 2 and uploaded audio
 float speed, volume; // used to adjust the rate and volume of the music in the sound file
+boolean audioSetupFlag; // Used to track whether the audio for each track has been set up. Used when a menu button is clicked.
 
 //Buttons
 int w1, w2, w3, w4; // Screen widths divded into 4 segments
@@ -11,13 +12,11 @@ int  h1, h2, h3, h4; // Screen height divded into 4 segments
 int ranRGBval = 255;  // Used to smoothly transition HSB colours
 PFont bannerFont; // Font used for banners/headers
 PFont descriptionFont; // Font used for descriptive text
-
-String page = "Home"; // Used for our Swtich - The original should be home
 Button homeStartButton, backButton, menuTrack1Button, menuTrack2Button, menuCustomTrackButton, menuRandomAudioButton;
-Label homeHeading, homeDescription;
 
-boolean audioSetupFlag; // Used to track whether the audio for each track has been set up. Used when a menu button is clicked.
-
+//Pages
+String page = "Home"; // Used for our Swtich - The original should be home
+Label homeHeading, homeDescription; // used to initialise Heading and Description on home page
 MusicNote[] notes = new MusicNote[60]; // Array of music notes to display in the background.
 int noteCounter = 0; // Used to determine when to dislplay a note.
 
@@ -28,7 +27,7 @@ void settings() {
 }
 
 void setup() {
-  // Setup screen widths and heights
+  // Setup screen widths and heights like 4x4 grid
   w1 = width/4;
   w2 = width/2;
   w3 = 3*width/4;
@@ -170,7 +169,8 @@ void menuScreen() {
   
   // If menu tracks are pressed, go to their respective page, stop showing menu buttons
   if (menuTrack1Button.isPressed() || menuTrack2Button.isPressed() || menuCustomTrackButton.isPressed() || menuRandomAudioButton.isPressed()) {
-    audioSetupFlag = false; // Declares that the audio for the next screen has not been set up yet. Used so that the audio isn't reset with every frame.
+    audioSetupFlag = false; // Declares that the audio for the next screen has not been set up yet. Used so that the audio isn't reset with every frame. 
+    // Makes sure that the audio isn't set up repeatedly in the loop making "zz zz zz zz" noise
     
     if (menuTrack1Button.isPressed()) page = "Track 1";
     if (menuTrack2Button.isPressed()) page = "Track 2";
@@ -217,7 +217,7 @@ void setRandomAudio() {
   // Runs once on start of the function. Sets audioSetupFlag to true after completion.
   if (!audioSetupFlag) {
     sin1 = new SinOsc(this);
-    sin1.play(350, 0.3);
+    sin1.play(350, 0.3); //sin1.play(frequency, amplitude)
     sin2 = new SinOsc(this);
     sin2.play(305, 0.3);
     

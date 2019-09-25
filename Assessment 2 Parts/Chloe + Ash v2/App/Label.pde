@@ -9,6 +9,7 @@ class Label {
   color fontColour;
   
   // First constructor, used when the user doesn't constrict the label to a text box.
+  // Used in App as homeHeading
   Label(float x, float y, int a1, int a2, String l, PFont f, color fc) {
     // Sets all label variables to those passed into the constructor.
     xPos = x;
@@ -21,6 +22,7 @@ class Label {
   }
   
   // Second constructor, used when the user constricts the label to a text box, accessed through passing in 2 extra variables; x2 and y2.
+  // Used in App as homeDescription
   Label(float x, float y, int a1, int a2, String l, PFont f, color fc, float x2, float y2) {
     // Sets all label variables to those passed into the constructor.
     xPos = x;
