@@ -17,7 +17,7 @@ Button homeStartButton, backButton, menuTrack1Button, menuTrack2Button, menuCust
 //Pages
 String page = "Home"; // Used for our Swtich - The original should be home
 Label homeHeading, homeDescription; // used to initialise Heading and Description on home page
-MusicNote[] notes = new MusicNote[60]; // Array of music notes to display in the background.
+MusicNote[] notes = new MusicNote[60]; // Array of music notes to display in the background. Array set to 60 items, therefore it can only contain up to 60 items.
 int noteCounter = 0; // Used to determine when to dislplay a note.
 
 // The settings() function allows us to use variables in the size() function.
@@ -111,15 +111,19 @@ void handleNotes() {
     noteCounter = 0;
   }
   
+  // Once a note fades out completely, it gets replaced with a new MusicNote.
+  
   // Runs every 4 frames.
   if (noteCounter == 4) {
     // For loop shifts each note down the array and makes room for one to be added at the end of the array.
     for (int i = 0; i < notes.length - 1; i++) {
       // Sets current index to the one after it, thereby shifting each index forward one place.
+      // E.g. sets the 5th note to the 6th note, and so on till the 59th to the 60th. Leaves the 60th alone.
       notes[i] = notes[i + 1];
     }
     
     // Adds a new music note to the end of the array, the -1 is because arrays are indexed from 0.
+    // Replaces the 60th element with a new Note.
     notes[notes.length - 1] = new MusicNote(color(random(360), 100, 100));
   }
   
