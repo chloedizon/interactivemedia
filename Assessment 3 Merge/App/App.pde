@@ -148,7 +148,7 @@ void homeScreen() {
   if (homeStartButton.isPressed()) {
     page = "Menu";
     homeStartButton.isDisplayed = false;
-    delay(100);
+    delay(300);
   }
 }
 
@@ -176,7 +176,7 @@ void menuScreen() {
     menuCustomTrackButton.isDisplayed = false;
     menuRandomAudioButton.isDisplayed = false;
     
-    delay(100);
+    delay(300);
   }
   
   if (menuTrack1Button.isPressed() || menuTrack2Button.isPressed() || menuCustomTrackButton.isPressed() || menuRandomAudioButton.isPressed()) {
@@ -193,7 +193,7 @@ void menuScreen() {
     menuCustomTrackButton.isDisplayed = false;
     menuRandomAudioButton.isDisplayed = false;
     
-    delay(100);
+    delay(300);
   }
 }
 
@@ -221,7 +221,7 @@ void gameScreen(String type) {
     
     backButton.isDisplayed = false;
     
-    delay(100);
+    delay(300);
   }
 }
 
@@ -295,9 +295,9 @@ void setRandomAudio() {
     audioSetupFlag = true;
   }
   
-  volume = map(waveAmplitude, 1, height/2 - 1, 0, 1);
-  int freq1 = int(map(wavePeriod, width*2/3, width/5, 0, 300));
-  int freq2 = int(map(wavePeriod, width*2/3, width/5, 0, 900));
+  volume = map(waveAmplitude, 1, height/2 - 1, 0.01, 1);
+  int freq1 = int(map(wavePeriod, width*2/3, width/5, 0.01, 300));
+  int freq2 = int(map(wavePeriod, width*2/3, width/5, 0.01, 900));
   
   sin1.freq(freq1);
   sin2.freq(freq2);
@@ -319,7 +319,7 @@ void setAudioFile(String type) {
     audioSetupFlag = true;
   }
   
-  volume = map(waveAmplitude, 1, height/2 - 1, 0, 1); 
+  volume = map(waveAmplitude, 1, height/2 - 1, 0.01, 1); 
   speed = map(wavePeriod, width*2/3, width/5, 0.5, 2);
   audio.amp(volume);
   audio.rate(speed);

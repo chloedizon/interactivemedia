@@ -258,7 +258,9 @@ void setAudioFile(String type) {
       audio.loop();
     }
     // Runs the track that the user selects, redirects to the fileSelected() function after track selection.
-    else if (type == "Upload") selectInput("Select an audio sample...", "fileSelected");
+    else {
+      selectInput("Select an audio sample...", "fileSelected");
+    }
     
     // Ensures audio isn't set up twice.
     audioSetupFlag = true;
