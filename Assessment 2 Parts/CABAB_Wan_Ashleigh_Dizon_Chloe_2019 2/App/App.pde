@@ -1,15 +1,8 @@
 //Sound
-import beads.*;
-import org.jaudiolibs.beads.*;
-
-AudioContext ac;
-Envelope rate;
-Gain g;
-WavePlayer wp;
-
-//Sound s; // initialiser for the sound in random audio - allows for adjustment of volume
-//SinOsc sin1, sin2; // sin oscilators that create the sound for random audio
-//SoundFile audio; // plays the mp3 file loaded in audio 1, 2 and uploaded audio
+import processing.sound.*; // imports processing sound module
+Sound s; // initialiser for the sound in random audio - allows for adjustment of volume
+SinOsc sin1, sin2; // sin oscilators that create the sound for random audio
+SoundFile audio; // plays the mp3 file loaded in audio 1, 2 and uploaded audio
 float speed, volume; // used to adjust the rate and volume of the music in the sound file
 boolean audioSetupFlag; // Used to track whether the audio for each track has been set up. Used when a menu button is clicked.
 
@@ -215,7 +208,7 @@ void gameScreen(String type) {
   if (backButton.isPressed()) {
     page = "Menu";
     
-    stopAudio();
+    stopAudio(type);
     
     backButton.isDisplayed = false;
     
@@ -227,22 +220,25 @@ void gameScreen(String type) {
 void setRandomAudio() {
   // Runs once on start of the function. Sets audioSetupFlag to true after completion.
   if (!audioSetupFlag) {
-    ac = new AudioContext();
-    wp = new WavePlayer(ac, 440, Buffer.SINE);
-    g = new Gain(ac, 1, 0.3);
-    g.addInput(wp);
-    ac.out.addInput(g);
-    ac.start();
+    sin1 = new SinOsc(this);
+    sin1.play(350, 0.3); //sin1.play(frequency, amplitude)
+    sin2 = new SinOsc(this);
+    sin2.play(305, 0.3);
     
+    s = new Sound(this);
     
     // Ensures audio isn't set up twice.
     audioSetupFlag = true;
   }
   
   // Maps mouse position to volume and frequency of the audio.
-  g.setGain(map(mouseY, height, 0, 0, 1.2));
-  wp.setFrequency(map(mouseX, 0, width, 0, 900));
+  volume = map(mouseY, height, 0, 0, 1);
+  int freq1 = int(map(mouseX, 0, width, 0, 300));
+  int freq2 = int(map(mouseX, 0, width, 0, 900));
   
+  sin1.freq(freq1);
+  sin2.freq(freq2);
+  s.volume(volume);
 }
 
 // Plays the selected audio file and updates its volume and speed.
@@ -250,51 +246,45 @@ void setAudioFile(String type) {
   // Runs once on start of the function. Sets audioSetupFlag to true after completion.
   if (!audioSetupFlag) {
     // Runs a predetermined track.
-    ac = new AudioContext();
     if (type == "Track 1") {
-      fileSelected(new File(dataPath("track1-cut.mp3")));
+      audio = new SoundFile(this, "track1-cut.mp3");
+      // Sets the track to loop so that once it finishes playing the user doesn't hear nothing.
+      audio.loop();
     }
     // Runs a predetermined track.
     else if (type == "Track 2") {
-      fileSelected(new File(dataPath("track2-cut.mp3")));
+      audio = new SoundFile(this, "track2-cut.mp3");
       // Sets the track to loop so that once it finishes playing the user doesn't hear nothing.
+      audio.loop();
     }
     // Runs the track that the user selects, redirects to the fileSelected() function after track selection.
-    else {
-      selectInput("Select an audio sample...", "fileSelected");
-    }
+    else if (type == "Upload") selectInput("Select an audio sample...", "fileSelected");
     
     // Ensures audio isn't set up twice.
     audioSetupFlag = true;
   }
   
   // Maps mouse position to volume and speed of the audio.
-  if (g != null) {
-    g.setGain(map(mouseY, height, 0, 0, 2));
-    rate.setValue(mouseX/float(width/2));
-  }
+  volume = map(mouseY, height, 0, 0, 1.0); 
+  speed = map(mouseX, 0, width, 1, 2);
+  audio.amp(volume);
+  audio.rate(speed);
 }
 
-void fileSelected(File sample) {
-  String fileName = sample.getAbsolutePath();
-  System.out.println(fileName + " this is the file");
-  
-  SamplePlayer player = new SamplePlayer(ac, SampleManager.sample(fileName));
-  
-  rate = new Envelope(ac, 0.3);
-  player.setRate(rate);
-  player.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
-  
-  Panner p = new Panner(ac, 0);
-  
-  g = new Gain(ac, 1, 0.3);
-  g.addInput(player);
-  g.addInput(p);
-  ac.out.addInput(g);
-  ac.start();
+void fileSelected(File file) {
+  // Sets the sound file to the file the user selects.
+  audio = new SoundFile(this, file.getAbsolutePath());
+  // Sets the track to loop so that once it finishes playing the user doesn't hear nothing.
+  audio.loop();
 }
 
 // Used to stop the audio when the user hits the back button.
-void stopAudio() {
-  ac.stop();
+void stopAudio(String type) {
+  // Random audio is stopped differently to the predetermined tracks.
+  if (type == "Random") {
+    sin1.stop();
+    sin2.stop();
+  } else {
+    audio.stop();
+  }
 }
