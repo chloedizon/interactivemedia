@@ -46,7 +46,7 @@ PeakDetector beatDetector;
 Frequency f;
 
 void settings() {
-  size(displayWidth*3/4, displayHeight*3/4, P3D);
+  size(1600, 900, P3D);
   
   // Music Wave Setup
   waveXSpacing = 16;
