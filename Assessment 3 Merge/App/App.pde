@@ -1,20 +1,26 @@
+// Package import for Leap Motion SDK
 import com.leapmotion.leap.*;
-import processing.sound.*; //imports processing sound module
+
+// Package imports for Beads sound module
+import beads.*;
+import org.jaudiolibs.beads.*;
 
 // Sound
-Sound s; //initialiser for the sound in random audio - allows for adjustment of volume
-SinOsc sin1, sin2; //sin oscilators that create the sound for random audio
-SoundFile audio; //plays the mp3 file loaded in audio 1, 2 and 3
+AudioContext ac;
+Envelope rate;
+Gain g;
+WavePlayer wp;
 float speed, volume; //used to adjust the rate and volume of the music in the sound file
 boolean audioSetupFlag;
 
-// Buttons
+// Display Variables
 int w1, w2, w3, w4; //Screen widths divded into 4 segments
 int  h1, h2, h3, h4; //Screen height divded into 4 segments
 int ranRGBval = 255;  
 PFont bannerFont;
 PFont descriptionFont;
 
+// Menu
 String page = "Home";
 Button homeStartButton, backButton, menuTrack1Button, menuTrack2Button, menuCustomTrackButton, menuRandomAudioButton;
 Label homeHeading, homeDescription, menuControllerMsg;
@@ -30,8 +36,17 @@ int waveXSpacing, waveWidth;
 float waveTheta, waveAmplitude, wavePeriod, waveDX, rightHandX, rightHandY, leftHandX, leftHandY, rightHandV;
 float[] waveYValues, rightHandVs;
 
+// Cube Background
+int cubesIndex, cubesLength;
+float bgX, bgY;
+Cube[] cubes;
+boolean cubesFull, beat;
+color fillColor, strokeColor;
+PeakDetector beatDetector;
+Frequency f;
+
 void settings() {
-  size(displayWidth*3>>2, displayHeight*3>>2);
+  size(displayWidth*3/4, displayHeight*3/4, P3D);
   
   // Music Wave Setup
   waveXSpacing = 16;
@@ -41,6 +56,11 @@ void settings() {
   wavePeriod = width*2/3;
   waveYValues = new float[waveWidth/waveXSpacing];
   rightHandVs = new float[round(frameRate)];
+  
+  // Cube Background Setup
+  cubesIndex = 0;
+  cubesLength = 30;
+  cubes = new Cube[cubesLength];
 }
 
 void setup() {
@@ -199,16 +219,20 @@ void menuScreen() {
 
 void gameScreen(String type) {
   if (controllerConnected) {
-    updateWaveVariables("Controller");
+    updateGameVariables("Controller");
   } else {
-    updateWaveVariables("Mouse");
+    updateGameVariables("Mouse");
   }
+  
+  background(bgX, bgY, 10);
   
   if (type == "Random") {
     setRandomAudio();
   } else {
     setAudioFile(type);
   }
+  
+  renderCubes();
   
   renderWave();
    
@@ -217,7 +241,7 @@ void gameScreen(String type) {
   if (backButton.isPressed()) {
     page = "Menu";
     
-    stopAudio(type);
+    stopAudio();
     
     backButton.isDisplayed = false;
     
@@ -225,7 +249,7 @@ void gameScreen(String type) {
   }
 }
 
-void updateWaveVariables(String controlType) {
+void updateGameVariables(String controlType) {
   if (controlType == "Controller") {
     Frame frame = controller.frame();
     
@@ -247,6 +271,9 @@ void updateWaveVariables(String controlType) {
     waveAmplitude = map(mouseY, height, 0, 1, height/2 - 1);
     wavePeriod = map(mouseX, 0, width, width*2/3, width/5);
   }
+  
+  bgX = map(wavePeriod, width*2/3, width/5, 0, 360);
+  bgY = map(waveAmplitude, 1, height/2 - 1, 20, 100);
   
   waveDX = (TWO_PI / wavePeriod) * waveXSpacing;
    
@@ -283,58 +310,147 @@ void renderWave() {
   }
 }
 
+void renderCubes() {
+  if (beat) {
+    fillColor = color(random(360), 100, random(50, 100));
+    strokeColor = color(255);
+    
+    float frequency = f.getFeatures();
+    
+    float cubeSize = frequency/(height/3) + 30;
+    
+    Cube cube = new Cube(cubeSize, fillColor, strokeColor, width/2, height/2, random(100, 300), random(100, 300));
+    
+    for (int i = 0; i < cubes.length - 1; i++) {
+      cubes[i] = cubes[i+1];
+    }
+    
+    cubes[cubes.length - 1] = cube;
+    
+    beat = !beat;
+  }
+  
+  for (int i = 0; i < cubes.length - 1; i++) {
+    if (cubes[i] instanceof Cube) {
+      cubes[i].display();
+      cubes[i].move();
+    }
+  }
+}
+
 void setRandomAudio() {
   if (!audioSetupFlag) {
-    sin1 = new SinOsc(this);
-    sin1.play(350, 0.3);
-    sin2 = new SinOsc(this);
-    sin2.play(305, 0.3);
+    ac = new AudioContext();
+    wp = new WavePlayer(ac, 440, Buffer.SINE);
+    g = new Gain(ac, 1, 0.3);
+    g.addInput(wp);
+    ac.out.addInput(g);
     
-    s = new Sound(this);
+    beatDetectorSetup();
+    ac.start();
     
+    // Ensures audio isn't set up twice.
     audioSetupFlag = true;
   }
   
-  volume = map(waveAmplitude, 1, height/2 - 1, 0.01, 1);
-  int freq1 = int(map(wavePeriod, width*2/3, width/5, 0.01, 300));
-  int freq2 = int(map(wavePeriod, width*2/3, width/5, 0.01, 900));
+  volume = map(waveAmplitude, 1, height/2 - 1, 0, 1.2);
+  int freq = int(map(wavePeriod, width*2/3, width/5, 0, 900));
   
-  sin1.freq(freq1);
-  sin2.freq(freq2);
-  s.volume(volume);
+  g.setGain(volume);
+  wp.setFrequency(freq);
 }
 
 void setAudioFile(String type) {
   if (!audioSetupFlag) {
+    ac = new AudioContext();
     if (type == "Track 1") {
-      audio = new SoundFile(this, "track1-cut.mp3");
-      audio.loop();
+      fileSelected(new File(dataPath("track1-cut.mp3")));
     }
     else if (type == "Track 2") {
-      audio = new SoundFile(this, "track2-cut.mp3");
-      audio.loop();
+      fileSelected(new File(dataPath("track2-cut.mp3")));
     }
-    else if (type == "Upload") selectInput("Select an audio sample...", "fileSelected");
+    else {
+      selectInput("Select an audio sample...", "fileSelected");
+    }
+    
+    beatDetectorSetup();
+    ac.start();
     
     audioSetupFlag = true;
   }
   
   volume = map(waveAmplitude, 1, height/2 - 1, 0.01, 1); 
   speed = map(wavePeriod, width*2/3, width/5, 0.5, 2);
-  audio.amp(volume);
-  audio.rate(speed);
-}
-
-void fileSelected(File file) {
-  audio = new SoundFile(this, file.getAbsolutePath());
-  audio.loop();
-}
-
-void stopAudio(String type) {
-  if (type == "Random") {
-    sin1.stop();
-    sin2.stop();
-  } else {
-    audio.stop();
+  
+  if (g != null) {
+    g.setGain(volume);
+    rate.setValue(speed);
   }
+}
+
+void fileSelected(File sample) {
+  String fileName = sample.getAbsolutePath();
+  System.out.println(fileName + " this is the file");
+  
+  SamplePlayer player = new SamplePlayer(ac, SampleManager.sample(fileName));
+  
+  rate = new Envelope(ac, 0.3);
+  player.setRate(rate);
+  player.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
+  
+  Panner p = new Panner(ac, 0);
+  
+  g = new Gain(ac, 1, 0.3);
+  g.addInput(player);
+  g.addInput(p);
+  ac.out.addInput(g);
+}
+
+void stopAudio() {
+  ac.stop();
+}
+
+void beatDetectorSetup() {
+  //Break the audio stream into manageable chunks
+  ShortFrameSegmenter sfs = new ShortFrameSegmenter(ac);
+  sfs.addInput(ac.out);
+  
+  //Calculates FFT, transforms waveform into sine components which allows for signal processing
+  FFT fft = new FFT();
+  
+  //Gives a plot of the portion of a signal's power within frequency bins
+  PowerSpectrum ps = new PowerSpectrum();
+  sfs.addListener(fft);
+  fft.addListener(ps);
+  
+  //44.1kHz is a commonplace 'sampling rate' for digital audio (industry standard)
+  f = new Frequency(44100.0f);
+  //Add listener to detect the frequency at different points in the sample
+  ps.addListener(f);
+  
+  //Detects spectral difference betwen one frame and the next, used to produce Onsets for PeakDetector
+  SpectralDifference sd = new SpectralDifference(ac.getSampleRate());
+  ps.addListener(sd);
+  
+  //Detects peaks in sound, uses SD to get Onsets
+  //Onset refers to beginning of a musical note or sound
+  beatDetector = new PeakDetector();
+  sd.addListener(beatDetector);
+  
+  //Used for changing sensitivity of beat detector
+  beatDetector.setThreshold(0.8f);
+  beatDetector.setAlpha(0.9f);
+  
+  //Listener for when a beat is detected
+  beatDetector.addMessageListener(
+    //Using beads as message handlers
+    new Bead(){
+      protected void messageReceived(Bead b)
+      {
+        beat = true;
+      }
+    }
+  );
+  
+  ac.out.addDependent(sfs);
 }
