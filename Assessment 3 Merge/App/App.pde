@@ -202,6 +202,8 @@ void menuScreen() {
   if (menuTrack1Button.isPressed() || menuTrack2Button.isPressed() || menuCustomTrackButton.isPressed() || menuRandomAudioButton.isPressed()) {
     audioSetupFlag = false;
     
+    cubes = new Cube[cubesLength];
+    
     if (menuTrack1Button.isPressed()) page = "Track 1";
     if (menuTrack2Button.isPressed()) page = "Track 2";
     if (menuCustomTrackButton.isPressed()) page = "Upload";
