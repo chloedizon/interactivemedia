@@ -20,7 +20,7 @@ class MusicNote {
   void display() {
     pushMatrix();
     rotate(rotationAngle);
-    translate(transX, transY);
+    translate(transX, transY, -10);
     beginShape();
     fill(noteColour, alpha);
     stroke(noteColour, alpha);
