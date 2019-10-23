@@ -19,6 +19,7 @@ int  h1, h2, h3, h4; //Screen height divded into 4 segments
 int ranRGBval = 255;  
 PFont bannerFont;
 PFont descriptionFont;
+String descriptionText;
 
 // Menu
 String page = "Home";
@@ -46,7 +47,7 @@ PeakDetector beatDetector;
 Frequency f;
 
 void settings() {
-  size(displayWidth*3/4, displayHeight*3/4, P3D);
+  size(displayWidth, displayHeight, P3D);
   
   // Music Wave Setup
   waveXSpacing = 16;
@@ -78,6 +79,7 @@ void setup() {
   
   bannerFont = createFont("NEON CLUB MUSIC_medium.otf", h1/2);
   descriptionFont = createFont("VCR_OSD_MONO_1.001.ttf", h1/8);
+  descriptionText = "Use your mouse to navigate this application." + "\n" + "Use the Leap Motion to control the sound. Your right hand will control the tempo, while your left hand controls the volume." + "\n" + "If you don't have a Leap Motion don't worry, use your mouse instead!";
   
   // ================================================================================================================================================================================================================================================================================================================================
   // BUTTON AND LABEL DECLARATIONS
@@ -91,7 +93,7 @@ void setup() {
   homeStartButton = new Button(w1, h2, w2, h1, "START", h1/2, descriptionFont, color(ranRGBval, 360, 260), color(0, 0, 360));
   // Labels
   homeHeading = new Label(w2, h1, CENTER, BOTTOM,  "Conductify", bannerFont, color(0, 0, 360));
-  homeDescription = new Label(w1, h1*0.75, CENTER, BOTTOM, "Use your hands to navigate this application. Choose between set songs or randomly generated audio. Your right hand will control the tempo, while your left hand controls the volume.", descriptionFont, color(0, 0, 360), w2, h1);
+  homeDescription = new Label(w1, h1*0.75, CENTER, BOTTOM, descriptionText, descriptionFont, color(0, 0, 360), w2, h1);
   
   // Main Menu
   // Buttons
