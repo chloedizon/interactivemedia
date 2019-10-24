@@ -22,7 +22,7 @@ In order to install and run this program, you will need the following:
 2. Double click the 'App' Processing sketch. This should open Processing.js.
 3. Navigate in the top options bar to Sketch / Import Library / Add Library. Search for Beads, click install.
 4. Click the play button in the top left hand corner of the screen. This should start the application.
-5. Ensure you have your leap motion controller plugged in if you are intending on using it to control the app.
+5. Ensure you have your leap motion controller plugged in if you are intending on using it to control the app, otherwise you can use your mouse to control the application.
 
 ## Built With
 
