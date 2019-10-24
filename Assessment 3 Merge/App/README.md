@@ -36,6 +36,6 @@ We used [GitHub](https://github.com/) for versioning. For the versions available
 
 * Ben Walton - 12875670
 * Ashleigh Wan - 12875403
-* Chloe Dizon - 12876403
+* Chloe Dizon - 12876304
 * Andrew Unsworth - 12876797
 * Isabela Hipolito - 12918304
